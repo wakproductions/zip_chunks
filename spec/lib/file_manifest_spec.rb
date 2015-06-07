@@ -10,7 +10,7 @@ RSpec.describe ZipChunks::FileManifest do
   let(:file_path_list) {
     ["file1.png", "file2.png", "file3,png", "file4.png"]
   }
-  let(:fixtures_count) { 1_264 } # You may have to change this if you change the sample data in the file-fixtures folder
+  let(:fixtures_count) { 239 } # You may have to change this if you change the sample data in the file-fixtures folder
 
   describe '#add' do
     it 'accepts a single file as a String and attaches the file size' do
