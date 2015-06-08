@@ -1,4 +1,5 @@
-require 'zip'
+#require 'zip'
+require 'zipruby'
 require 'pathname'
 require_relative 'file_manifest'
 
@@ -12,13 +13,22 @@ module ZipChunks
       @manifest = FileManifest.new
       @next_zip_file_id = 1
       @zip_file_size = DVD_ZIP_MAX_SIZE
-      Zip.default_compression = Zlib::BEST_COMPRESSION
+      #Zip.default_compression = Zlib::BEST_COMPRESSION #no longer needed since switch to ZipRuby from RubyZip
     end
 
     def build_file_manifest(base_dir)
       @base_dir = base_dir
       @manifest.add_directory(base_dir)
       @manifest.save_manifest
+    end
+
+    def load_manifest_file(filename)
+      @manifest.load_manifest_file(filename)
+    end
+
+    # No test coverage
+    def just_copy_files(output_dir, zip_filename_base)
+
     end
 
     # No test coverage
@@ -33,22 +43,31 @@ module ZipChunks
     def build_zip(zip_file_name)
       size_needed = @zip_file_size
       begin
-        file_list = @manifest.next_file_bunch(size_needed)
-        if file_list.size > 0
+        next_file_list = @manifest.next_file_bunch(size_needed)
+        if next_file_list.size > 0
+          file_list = (@manifest.files_in_zip(zip_file_name).to_a + next_file_list.to_a).to_h
           filenames = file_list.map { |file_sym, data| file_sym.to_s }
           add_files_to_zip(zip_file_name, filenames)
           size_needed = size_needed - File.size(zip_file_name)
         end
-      end while file_list.size > 0
+      end while next_file_list.size > 0
     end
 
     # No test coverage
     def add_files_to_zip(zip_file_name, files_to_add)
-      ::Zip::File.open(zip_file_name, ::Zip::File::CREATE) do |zip_io|
+      # ZipRuby Code
+      Zip::Archive.open(zip_file_name, Zip::BEST_COMPRESSION) do |zip_io|
         files_to_add.each do |filename|
-          zip_io.add(relative_path(@base_dir, filename.to_s), filename.to_s)
+          zip_io.add_file(relative_path(@base_dir, filename.to_s), filename.to_s)
         end
       end
+
+      # RubyZip code
+      # ::Zip::File.open(zip_file_name, ::Zip::File::CREATE) do |zip_io|
+      #   files_to_add.each do |filename|
+      #     zip_io.add(relative_path(@base_dir, filename.to_s), filename.to_s)
+      #   end
+      # end
       update_manifest(files_to_add, zip_file_name)
     end
 

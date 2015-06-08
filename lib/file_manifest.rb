@@ -38,6 +38,10 @@ module ZipChunks
       end
     end
 
+    def files_in_zip(zip_file)
+      @manifest.select { |file, data| data[:zip_file].eql?(zip_file) }
+    end
+
     # No test coverage for this
     def save_manifest(filename=DEFAULT_SAVE_FILE)
       f = open(filename, 'w')
