@@ -51,6 +51,26 @@ module ZipChunks
       end
     end
 
+    def load_manifest_file(filename)
+      f = open(filename, 'r')
+      f.readline  # skip the header
+      until f.eof?
+        file,size,zip_file = f.readline.strip.split('|')
+
+        # This will only UPDATE an existing manifest object - so that you don't have references to files that no longer
+        # exist if the manifest is old.
+        if @manifest[file.to_sym]
+          unless size==''
+            @manifest[file.to_sym][:size] = size.to_i
+          end
+
+          unless zip_file==''
+            @manifest[file.to_sym][:zip_file] = zip_file
+          end
+        end
+      end
+    end
+
     private
 
     def add_file(file_name)

@@ -42,6 +42,7 @@ RSpec.configure do |config|
 
   config.before(:context) do
     @file_fixtures_dir = File.join(Dir.pwd, 'spec', 'file-fixtures')
+    @manifest_fixtures_dir = File.join(Dir.pwd, 'spec', 'manifest-fixture')
   end
 
 end

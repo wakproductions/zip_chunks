@@ -66,5 +66,19 @@ RSpec.describe ZipChunks::FileManifest do
 
   end
 
+  describe '#load_manifest_file' do
+    let(:manifest_file) { File.join(@manifest_fixtures_dir, 'sample_file_manifest.txt') }
+    let(:manifest_sample_entry) { '/Users/wkotzan/Development/gem-development/zip-chunks/spec/file-fixtures/Screen Shot 2015-01-24 at 8.43.11 PM.png' }
+    let(:manifest_sample_entry_size) { 429493 }
+    let(:manifest_sample_entry_zip_file)  { '/Users/wkotzan/Development/gem-development/zip-chunks/output/fixtures_1.zip' }
+
+    it 'loads a manifest' do
+      manifest.add_directory(@file_fixtures_dir)
+      manifest.load_manifest_file(manifest_file)
+      expect(manifest[manifest_sample_entry][:size]).to eql(manifest_sample_entry_size)
+      expect(manifest[manifest_sample_entry][:zip_file]).to eql(manifest_sample_entry_zip_file)
+    end
+  end
+
 
 end
