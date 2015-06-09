@@ -1,6 +1,7 @@
 #require 'zip'
 require 'zipruby'
 require 'pathname'
+require 'fileutils'
 require_relative 'file_manifest'
 
 module ZipChunks
@@ -28,7 +29,24 @@ module ZipChunks
 
     # No test coverage
     def just_copy_files(output_dir, zip_filename_base)
+      until @manifest.next_file_bunch(@zip_file_size).empty?
+        copy_files(File.join(output_dir, "#{zip_filename_base}#{@next_zip_file_id}"))
+        @next_zip_file_id += 1
+      end
 
+    end
+
+    def copy_files(output_dir)
+      next_file_list = @manifest.next_file_bunch(@zip_file_size)
+      if next_file_list.size > 0
+        filenames = next_file_list.map { |file_sym, data| file_sym.to_s }
+        filenames.each do |filename|
+          copy_to_dir = File.dirname(File.join(output_dir, relative_path(@base_dir, filename.to_s)))
+          FileUtils.mkdir_p(copy_to_dir)
+          FileUtils.cp filename, copy_to_dir
+        end
+        update_manifest(filenames, output_dir)
+      end
     end
 
     # No test coverage
